@@ -1,0 +1,31 @@
+version: "3"
+
+tasks:
+  up:
+    desc: Set up stack (infra + api)
+    cmds:
+      - docker compose -f infra/docker-compose.yml --env-file .env up -d --build
+
+  down:
+    desc: Tear down stack (infra + api)
+    cmds:
+      - docker compose -f infra/docker-compose.yml --env-file .env down
+
+  logs:
+    desc: API logs
+    cmds:
+      - docker logs -f mh_api
+
+  psql:
+    desc: Access PostgreSQL shell inside the db container
+    cmds:
+      - docker exec -it mh_db psql -U {{.POSTGRES_USER}} -d {{.POSTGRES_DB}}
+    vars:
+      POSTGRES_USER: { sh: "grep POSTGRES_USER .env | cut -d '=' -f2" }
+      POSTGRES_DB: { sh: "grep POSTGRES_DB .env | cut -d '=' -f2" }
+
+  restart:
+    desc: Restart the stack (infra + api)
+    cmds:
+      - task: down
+      - task: up
