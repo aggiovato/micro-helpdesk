@@ -1,13 +1,18 @@
 version: "3"
 
 tasks:
-  up:
-    desc: Set up stack (infra + api)
+  build:
+    desc: Build Docker images (without starting containers)
     cmds:
-      - docker compose -f infra/docker-compose.yml --env-file .env up -d --build
+      - docker compose -f infra/docker-compose.yml --env-file .env build
+
+  up:
+    desc: Start containers (without rebuilding images)
+    cmds:
+      - docker compose -f infra/docker-compose.yml --env-file .env up -d
 
   down:
-    desc: Tear down stack (infra + api)
+    desc: Stop and remove containers
     cmds:
       - docker compose -f infra/docker-compose.yml --env-file .env down
 
