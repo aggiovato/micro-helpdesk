@@ -6,6 +6,10 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
 import { typeDefs, resolvers } from "./infra/graphql/schema";
 
+// Test db connection
+import { dbPing } from "./infra/db/pool";
+import { buildContext } from "./infra/graphql/context";
+
 const PORT = Number(process.env.PORT ?? "4000");
 
 // Bootstrap server
@@ -15,8 +19,13 @@ async function bootstrap() {
   app.use(express.json());
 
   // health check
-  app.get("/health", (_req, res) => {
-    res.status(200).json({ ok: true });
+  app.get("/health", async (_req, res) => {
+    try {
+      const dbOk = await dbPing();
+      res.json({ ok: true, db: dbOk ? "up" : "down" });
+    } catch (err) {
+      res.status(500).json({ ok: false, db: "down" });
+    }
   });
 
   // Apollo server
@@ -27,7 +36,7 @@ async function bootstrap() {
 
   await apollo.start();
 
-  app.use("/graphql", expressMiddleware(apollo));
+  app.use("/graphql", expressMiddleware(apollo, { context: buildContext }));
 
   // Start server
   app.listen(PORT, () => {

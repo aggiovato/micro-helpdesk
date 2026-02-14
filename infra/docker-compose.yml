@@ -33,5 +33,21 @@ services:
         condition: service_healthy
     command: sh -c "npm install && npm run dev"
 
+  migrations:
+    image: flyway/flyway:10
+    container_name: mh_migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/flyway/migrations
+    command: >
+      -url=${FLYWAY_URL}
+      -locations=filesystem:/flyway/migrations
+      -user=${POSTGRES_USER}
+      -password=${POSTGRES_PASSWORD}
+      -connectRetries=60
+      migrate
+
 volumes:
   mh_pgdata:

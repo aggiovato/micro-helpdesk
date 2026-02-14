@@ -16,8 +16,13 @@ tasks:
     cmds:
       - docker compose -f infra/docker-compose.yml --env-file .env down
 
+  migrate:
+    desc: Run database migrations (Flyway)
+    cmds:
+      - docker compose -f infra/docker-compose.yml --env-file .env run --rm migrations
+
   logs:
-    desc: API logs
+    desc: API logs (follow mode)
     cmds:
       - docker logs -f mh_api
 
